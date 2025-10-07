@@ -6,6 +6,7 @@
 	let done = ["Task 4"];
 	let archive = [];
 
+
 	function handleDragStart(item, from, e) {
 		e.dataTransfer.setData("item", item);
 		e.dataTransfer.setData("from", from);
@@ -31,10 +32,32 @@
 		if (to === "done") done.push(item);
 		if (to === "archive") archive.push(item);
 	}
+
+	function openModal() {
+		showModal = true;
+		newTask = "";
+	}
+
+	function addTask() {
+		if (newTask.trim() === "") return;
+		todo.push(newTask.trim());
+		newTask = "";
+		showModal = false;
+	}
 </script>
 
-<h1 class="text-center text-xl font-semibold mb-4">Simple Kanban Board</h1>
+<!-- 🧭 Navigation bar -->
+<nav class="flex justify-between items-center bg-blue-600 text-white px-6 py-3">
+	<h1 class="text-lg font-semibold">My Kanban</h1>
+	<button
+		class="bg-white text-blue-600 font-medium px-3 py-1 rounded hover:bg-blue-100"
+		on:click={openModal}
+	>
+		Add Task
+	</button>
+</nav>
 
+<!-- 📋 Board -->
 <main class="flex justify-center gap-6 p-8 bg-gray-100 min-h-[400px]">
 	{#each [
 		{ id: "todo", title: "To Do", items: todo },
@@ -61,3 +84,32 @@
 		</section>
 	{/each}
 </main>
+
+<!-- 💬 Modal -->
+{#if showModal}
+	<div class="fixed inset-0 bg-black/40 flex justify-center items-center">
+		<div class="bg-white rounded-lg shadow-lg p-6 w-[300px]">
+			<h2 class="text-lg font-semibold mb-3">Add a new task</h2>
+			<input
+				bind:value={newTask}
+				type="text"
+				placeholder="Task name..."
+				class="border border-gray-300 rounded w-full px-2 py-1 mb-3 focus:outline-none focus:ring"
+			/>
+			<div class="flex justify-end gap-2">
+				<button
+					class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+					on:click={() => (showModal = false)}
+				>
+					Cancel
+				</button>
+				<button
+					class="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+					on:click={addTask}
+				>
+					Add
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
