@@ -1,22 +1,26 @@
 <script>
-import TaskModal from "$lib/components/TaskModal.svelte";
-	// Tasks array
-	let tasks = [];
+	import TaskModal from "$lib/components/TaskModal.svelte";
 
-	// Modal reference
+	let tasks = [];
 	let modalRef;
 
-	// Add a new task
+	// Load tasks from localStorage on app start
+	if (typeof localStorage !== "undefined") {
+		const saved = localStorage.getItem("kanban-tasks");
+		if (saved) tasks = JSON.parse(saved);
+	}
+
+	// Whenever tasks change, save to localStorage
+	$: localStorage.setItem("kanban-tasks", JSON.stringify(tasks));
+
 	function addTask(newTask) {
 		tasks = [...tasks, newTask];
 	}
 
-	// Open the modal
 	function openModal() {
 		modalRef.showDialog();
 	}
 
-	// Drag & Drop
 	let draggedTaskId = null;
 
 	function handleDragStart(taskId) {
@@ -29,6 +33,8 @@ import TaskModal from "$lib/components/TaskModal.svelte";
 		draggedTaskId = null;
 	}
 </script>
+git add .
+git commit -m "feat(storage): persist tasks in localStorage"
 
 <!-- Header / Add Task -->
 <div class="flex justify-between items-center p-4 bg-blue-600 text-white">
