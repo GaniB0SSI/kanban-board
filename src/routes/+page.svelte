@@ -1,117 +1,69 @@
 <script>
-	import { flip } from "svelte/animate";
+import TaskModal from "$lib/components/TaskModal.svelte";
+	// Tasks array
+	let tasks = [];
 
-	let todo = ["Task 1", "Task 2"];
-	let doing = ["Task 3"];
-	let done = ["Task 4"];
-	let archive = [];
-	let newTask = "";
-	let showModal = false; 
+	// Modal reference
+	let modalRef;
 
-
-	function handleDragStart(item, from, e) {
-		e.dataTransfer.setData("item", item);
-		e.dataTransfer.setData("from", from);
+	// Add a new task
+	function addTask(newTask) {
+		tasks = [...tasks, newTask];
 	}
 
-	function handleDragOver(e) {
-		e.preventDefault();
-	}
-
-	function handleDrop(to, e) {
-		e.preventDefault();
-
-		const item = e.dataTransfer.getData("item");
-		const from = e.dataTransfer.getData("from");
-
-		if (from === "todo") todo = todo.filter(i => i !== item);
-		if (from === "doing") doing = doing.filter(i => i !== item);
-		if (from === "done") done = done.filter(i => i !== item);
-		if (from === "archive") archive = archive.filter(i => i !== item);
-
-		if (to === "todo") todo.push(item);
-		if (to === "doing") doing.push(item);
-		if (to === "done") done.push(item);
-		if (to === "archive") archive.push(item);
-	}
-
+	// Open the modal
 	function openModal() {
-		showModal = true;
-		newTask = "";
+		modalRef.showDialog();
 	}
 
-	function addTask() {
-		if (newTask.trim() === "") return;
-		todo.push(newTask.trim());
-		newTask = "";
-		showModal = false;
+	// Drag & Drop
+	let draggedTaskId = null;
+
+	function handleDragStart(taskId) {
+		draggedTaskId = taskId;
+	}
+
+	function handleDrop(lane) {
+		if (!draggedTaskId) return;
+		tasks = tasks.map(t => t.id === draggedTaskId ? { ...t, lane } : t);
+		draggedTaskId = null;
 	}
 </script>
 
-<!-- 🧭 Navigation bar -->
-<nav class="flex justify-between items-center bg-blue-600 text-white px-6 py-3">
-	<h1 class="text-lg font-semibold">My Kanban</h1>
-	<button
-	onclick={openModal}
-	class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
->
-	Add Task
-</button>
-</nav>
+<!-- Header / Add Task -->
+<div class="flex justify-between items-center p-4 bg-blue-600 text-white">
+	<h1 class="text-lg font-semibold">Kanban Board</h1>
+	<button onclick={openModal} class="px-4 py-2 bg-white text-blue-600 rounded hover:bg-blue-100">
+		Add Task
+	</button>
+</div>
 
-<!-- 📋 Board -->
-<main class="flex justify-center gap-6 p-8 bg-gray-100 min-h-[400px]">
-	{#each [
-		{ id: "todo", title: "To Do", items: todo },
-		{ id: "doing", title: "Doing", items: doing },
-		{ id: "done", title: "Done", items: done },
-		{ id: "archive", title: "Archive", items: archive }
-	] as { id, title, items }}
+<!-- Kanban Board -->
+<div class="flex gap-4 p-4">
+	{#each ["todo", "doing", "done", "archive"] as lane}
 		<section
-			class="h-[350px] w-[150px] bg-white border-2 border-gray-300 rounded-lg flex flex-col items-center justify-start p-2"
-			ondragover={handleDragOver}
-			ondrop={(e) => handleDrop(id, e)}
+			role="list"
+			class="w-[200px] bg-gray-100 p-2 rounded flex flex-col gap-2"
+			ondragover={e => e.preventDefault()}
+			ondrop={() => handleDrop(lane)}
 		>
-			<h2 class="font-bold mb-2">{title}</h2>
-			{#each items as item (item)}
-				<article
-					class="p-3 bg-blue-300 rounded-md mb-2 cursor-move w-full text-center shadow"
+			<h2 class="font-bold mb-2 capitalize">{lane}</h2>
+
+			{#each tasks.filter(t => t.lane === lane) as task (task.id)}
+				<div
+					class="bg-white p-2 rounded shadow cursor-move"
 					draggable="true"
-					ondragstart={(e) => handleDragStart(item, id, e)}
-					animate:flip
+					ondragstart={() => handleDragStart(task.id)}
 				>
-					{item}
-				</article>
+					<h3 class="font-semibold">{task.title}</h3>
+					<p class="text-sm">{task.description}</p>
+					<p class="text-xs text-gray-500">Due: {task.dueDate}</p>
+					<p class="text-xs text-gray-500">SP: {task.storyPoints} | Priority: {task.priority}</p>
+				</div>
 			{/each}
 		</section>
 	{/each}
-</main>
+</div>
 
-<!-- 💬 Modal -->
-{#if showModal}
-	<div class="fixed inset-0 bg-black/40 flex justify-center items-center">
-		<div class="bg-white rounded-lg shadow-lg p-6 w-[300px]">
-			<h2 class="text-lg font-semibold mb-3">Add a new task</h2>
-			<input
-				bind:value={newTask}
-				type="text"
-				placeholder="Task name..."
-				class="border border-gray-300 rounded w-full px-2 py-1 mb-3 focus:outline-none focus:ring"
-			/>
-			<div class="flex justify-end gap-2">
-				<button
-	class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
-	onclick={() => (showModal = false)}
->
-	Cancel
-</button>
-				<button
-					class="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-					onclick={() => addTask()}
-				>
-					Add
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+<!-- Task Modal -->
+<TaskModal bind:this={modalRef} onAddTask={addTask}/>
