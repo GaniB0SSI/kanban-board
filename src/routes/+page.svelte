@@ -4,12 +4,29 @@
 
 	let tasks = [];
 	let modalRef;
+function notifyTaskDone(task) {
+    if (typeof window === "undefined") return; // SSR guard
 
-	// Load tasks from localStorage only on the client
-	onMount(() => {
-		const saved = localStorage.getItem("kanban-tasks");
-		if (saved) tasks = JSON.parse(saved);
-	});
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                new Notification(`Task Done: ${task.title}`, {
+                    body: `Due: ${task.dueDate}`
+                });
+            }
+        });
+    } else {
+        new Notification(`Task Done: ${task.title}`, {
+            body: `Due: ${task.dueDate}`
+        });
+    }
+}
+
+// Load tasks from localStorage only on the client
+onMount(() => {
+    const saved = localStorage.getItem("kanban-tasks");
+    if (saved) tasks = JSON.parse(saved);
+});
 
 	// Save tasks whenever they change (client-side only)
 	$: if (typeof window !== "undefined") {
@@ -34,10 +51,21 @@
 	}
 
 	function handleDrop(lane) {
-		if (!draggedTaskId) return;
-		tasks = tasks.map(t => t.id === draggedTaskId ? { ...t, lane } : t);
-		draggedTaskId = null;
-	}
+    if (!draggedTaskId) return;
+
+    tasks = tasks.map(t => {
+        if (t.id === draggedTaskId) {
+            // Trigger notification if moving to Done
+            if (lane === "done" && t.lane !== "done") {
+                notifyTaskDone(t);
+            }
+            return { ...t, lane };
+        }
+        return t;
+    });
+
+    draggedTaskId = null;
+}
 </script>
 
 
