@@ -50,8 +50,7 @@
 	<form onsubmit={e => { e.preventDefault(); submitTask(); }} class="p-4 flex flex-col gap-3 w-[300px]">
 		<h2 class="text-lg font-semibold">Add New Task</h2>
 		<input type="text" placeholder="Title" value={title} oninput={e => title = e.target.value} required class="border px-2 py-1 rounded"/>
-		<textarea placeholder="Description" value={description} oninput={e => description = e.target.value} class="border px-2 py-1 rounded"/>
-		<input type="date" value={dueDate} oninput={e => dueDate = e.target.value} class="border px-2 py-1 rounded"/>
+<textarea placeholder="Description" oninput={e => description = e.target.value} class="border px-2 py-1 rounded">{description}</textarea>		<input type="date" value={dueDate} oninput={e => dueDate = e.target.value} class="border px-2 py-1 rounded"/>
 		<input type="number" min="1" max="100" value={storyPoints} oninput={e => storyPoints = +e.target.value} class="border px-2 py-1 rounded"/>
 		<select value={priority} oninput={e => priority = e.target.value} class="border px-2 py-1 rounded">
 			<option>Low</option>
