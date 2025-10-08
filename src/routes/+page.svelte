@@ -33,9 +33,11 @@ import TaskModal from "$lib/components/TaskModal.svelte";
 <!-- Header / Add Task -->
 <div class="flex justify-between items-center p-4 bg-blue-600 text-white">
 	<h1 class="text-lg font-semibold">Kanban Board</h1>
-	<button onclick={openModal} class="px-4 py-2 bg-white text-blue-600 rounded hover:bg-blue-100">
-		Add Task
-	</button>
+	<button onclick={() => modalRef.showDialog()} class="mb-4 px-4 py-2 bg-blue-600 text-white rounded">
+	Add Task
+</button>
+
+<TaskModal bind:this={modalRef} onAddTask={addTask}/>
 </div>
 
 <!-- Kanban Board -->

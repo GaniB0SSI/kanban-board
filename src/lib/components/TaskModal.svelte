@@ -1,5 +1,6 @@
 <script>
-	export let open = false;
+	let dialogEl;
+
 	export let onAddTask;
 
 	let title = "";
@@ -8,16 +9,14 @@
 	let storyPoints = 1;
 	let priority = "Medium";
 
-	let dialogEl;
-
-	function showDialog() {
-		open = true;
+	// Expose a function for main page to open the modal
+	export function showDialog() {
 		dialogEl?.showModal();
 	}
 
 	function closeDialog() {
-		open = false;
 		dialogEl?.close();
+		resetForm();
 	}
 
 	function submitTask() {
@@ -35,7 +34,7 @@
 		};
 
 		onAddTask(task);
-		resetForm();
+		closeDialog();
 	}
 
 	function resetForm() {
@@ -44,14 +43,12 @@
 		dueDate = "";
 		storyPoints = 1;
 		priority = "Medium";
-		closeDialog();
 	}
 </script>
 
 <dialog bind:this={dialogEl}>
 	<form onsubmit={e => { e.preventDefault(); submitTask(); }} class="p-4 flex flex-col gap-3 w-[300px]">
 		<h2 class="text-lg font-semibold">Add New Task</h2>
-
 		<input type="text" placeholder="Title" value={title} oninput={e => title = e.target.value} required class="border px-2 py-1 rounded"/>
 		<textarea placeholder="Description" value={description} oninput={e => description = e.target.value} class="border px-2 py-1 rounded"/>
 		<input type="date" value={dueDate} oninput={e => dueDate = e.target.value} class="border px-2 py-1 rounded"/>
