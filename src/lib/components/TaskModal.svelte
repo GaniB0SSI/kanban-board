@@ -1,7 +1,7 @@
 <script>
-  export let onAddTask;      // callback for adding a new task
-  export let onEditTask;     // callback for editing an existing task
-  export let taskToEdit = null; // the task object to edit
+  export let onAddTask;
+  export let onEditTask;
+  export let taskToEdit = null;
   let dialogEl;
 
   let title = "";
@@ -10,7 +10,7 @@
   let storyPoints = 1;
   let priority = "Medium";
 
-  // When modal opens for editing, fill form fields
+  // Populate form when editing
   $: if (taskToEdit) {
     title = taskToEdit.title;
     description = taskToEdit.description;
@@ -20,13 +20,13 @@
   }
 
   function submit() {
-    const task = { 
-      ...taskToEdit, 
-      title, 
-      description, 
-      dueDate, 
-      storyPoints, 
-      priority 
+    const task = {
+      ...taskToEdit,
+      title,
+      description,
+      dueDate,
+      storyPoints,
+      priority
     };
 
     if (taskToEdit) {
@@ -34,6 +34,7 @@
     } else {
       onAddTask(task);
     }
+
     resetForm();
     closeDialog();
   }
@@ -60,33 +61,13 @@
   <form on:submit={e => { e.preventDefault(); submit(); }} class="p-4 flex flex-col gap-3 w-[300px]">
     <h2 class="text-lg font-semibold">{taskToEdit ? "Edit Task" : "Add New Task"}</h2>
 
-    <input
-      type="text"
-      placeholder="Title"
-      bind:value={title}
-      required
-      class="border px-2 py-1 rounded"
-    />
+    <input type="text" placeholder="Title" bind:value={title} required class="border px-2 py-1 rounded"/>
 
-    <textarea
-      placeholder="Description"
-      bind:value={description}
-      class="border px-2 py-1 rounded"
-    ></textarea>
+    <textarea placeholder="Description" bind:value={description} class="border px-2 py-1 rounded"></textarea>
 
-    <input
-      type="date"
-      bind:value={dueDate}
-      class="border px-2 py-1 rounded"
-    />
+    <input type="date" bind:value={dueDate} class="border px-2 py-1 rounded"/>
 
-    <input
-      type="number"
-      min="1"
-      max="100"
-      bind:value={storyPoints}
-      class="border px-2 py-1 rounded"
-    />
+    <input type="number" min="1" max="100" bind:value={storyPoints} class="border px-2 py-1 rounded"/>
 
     <select bind:value={priority} class="border px-2 py-1 rounded">
       <option>Low</option>
@@ -95,19 +76,8 @@
     </select>
 
     <div class="flex justify-end gap-2 mt-2">
-      <button
-        type="button"
-        on:click={closeDialog}
-        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-      >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        {taskToEdit ? "Save" : "Add"}
-      </button>
+      <button type="button" on:click={closeDialog} class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+      <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">{taskToEdit ? "Save" : "Add"}</button>
     </div>
   </form>
 </dialog>

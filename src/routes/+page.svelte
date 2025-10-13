@@ -4,6 +4,7 @@
 
 	let tasks = [];
 	let modalRef;
+
 	// Load tasks from localStorage only on the client
 	onMount(() => {
 		const saved = localStorage.getItem("kanban-tasks");
@@ -17,7 +18,6 @@
 
 	// Add a new task
 	function addTask(newTask) {
-		// Assign unique id
 		newTask.id = crypto.randomUUID();
 		tasks = [...tasks, newTask];
 	}
@@ -31,7 +31,10 @@
 	function deleteTask(id) {
 		tasks = tasks.filter(t => t.id !== id);
 	}
+
+	// Open modal for adding
 	function openModal() {
+		console.log("hallo")
 		modalRef.taskToEdit = null;
 		modalRef.showDialog();
 	}
