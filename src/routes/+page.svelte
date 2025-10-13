@@ -4,7 +4,6 @@
 
 	let tasks = [];
 	let modalRef;
-
 	// Load tasks from localStorage only on the client
 	onMount(() => {
 		const saved = localStorage.getItem("kanban-tasks");
@@ -18,11 +17,28 @@
 
 	// Add a new task
 	function addTask(newTask) {
+		// Assign unique id
+		newTask.id = crypto.randomUUID();
 		tasks = [...tasks, newTask];
 	}
 
-	// Open modal
+	// Edit an existing task
+	function editTask(updatedTask) {
+		tasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+	}
+
+	// Delete a task
+	function deleteTask(id) {
+		tasks = tasks.filter(t => t.id !== id);
+	}
 	function openModal() {
+		modalRef.taskToEdit = null;
+		modalRef.showDialog();
+	}
+
+	// Open modal for editing
+	function openEditModal(task) {
+		modalRef.taskToEdit = task;
 		modalRef.showDialog();
 	}
 
@@ -110,7 +126,7 @@ END:VCALENDAR
 </div>
 
 <!-- Kanban Board -->
-<div class="flex gap-4 p-4">
+<div class="flex gap-4 p-4 flex-wrap">
 	{#each ["todo", "doing", "done", "archive"] as lane}
 		<section
 			role="list"
@@ -135,12 +151,26 @@ END:VCALENDAR
 					<p class="text-xs text-gray-500">Due: {task.dueDate}</p>
 					<p class="text-xs text-gray-500">SP: {task.storyPoints} | Priority: {task.priority}</p>
 
-					<button
-						class="mt-2 px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-						onclick={() => exportICS(task)}
-					>
-						Export ICS
-					</button>
+					<div class="mt-2 flex gap-2">
+						<button
+							class="px-2 py-1 text-xs bg-yellow-400 text-white rounded hover:bg-yellow-500"
+							onclick={() => openEditModal(task)}
+						>
+							Edit
+						</button>
+						<button
+							class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+							onclick={() => deleteTask(task.id)}
+						>
+							Delete
+						</button>
+						<button
+							class="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+							onclick={() => exportICS(task)}
+						>
+							Export ICS
+						</button>
+					</div>
 				</div>
 			{/each}
 		</section>
@@ -148,4 +178,4 @@ END:VCALENDAR
 </div>
 
 <!-- Task Modal -->
-<TaskModal bind:this={modalRef} onAddTask={addTask}/>
+<TaskModal bind:this={modalRef} onAddTask={addTask} onEditTask={editTask}/>

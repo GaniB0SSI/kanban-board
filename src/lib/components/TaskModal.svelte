@@ -1,66 +1,113 @@
 <script>
-	let dialogEl;
+  export let onAddTask;      // callback for adding a new task
+  export let onEditTask;     // callback for editing an existing task
+  export let taskToEdit = null; // the task object to edit
+  let dialogEl;
 
-	export let onAddTask;
+  let title = "";
+  let description = "";
+  let dueDate = "";
+  let storyPoints = 1;
+  let priority = "Medium";
 
-	let title = "";
-	let description = "";
-	let dueDate = "";
-	let storyPoints = 1;
-	let priority = "Medium";
+  // When modal opens for editing, fill form fields
+  $: if (taskToEdit) {
+    title = taskToEdit.title;
+    description = taskToEdit.description;
+    dueDate = taskToEdit.dueDate || "";
+    storyPoints = taskToEdit.storyPoints;
+    priority = taskToEdit.priority;
+  }
 
-	// Expose a function for main page to open the modal
-	export function showDialog() {
-		dialogEl?.showModal();
-	}
+  function submit() {
+    const task = { 
+      ...taskToEdit, 
+      title, 
+      description, 
+      dueDate, 
+      storyPoints, 
+      priority 
+    };
 
-	function closeDialog() {
-		dialogEl?.close();
-		resetForm();
-	}
+    if (taskToEdit) {
+      onEditTask(task);
+    } else {
+      onAddTask(task);
+    }
+    resetForm();
+    closeDialog();
+  }
 
-	function submitTask() {
-		if (!title.trim()) return;
+  function resetForm() {
+    title = "";
+    description = "";
+    dueDate = "";
+    storyPoints = 1;
+    priority = "Medium";
+    taskToEdit = null;
+  }
 
-		const task = {
-			id: Date.now(),
-			title: title.trim(),
-			description: description.trim(),
-			creationDate: new Date().toISOString(),
-			dueDate,
-			storyPoints: Number(storyPoints),
-			priority,
-			lane: "todo",
-		};
+  function showDialog() {
+    dialogEl.showModal();
+  }
 
-		onAddTask(task);
-		closeDialog();
-	}
-
-	function resetForm() {
-		title = "";
-		description = "";
-		dueDate = "";
-		storyPoints = 1;
-		priority = "Medium";
-	}
+  function closeDialog() {
+    dialogEl.close();
+  }
 </script>
 
 <dialog bind:this={dialogEl}>
-	<form onsubmit={e => { e.preventDefault(); submitTask(); }} class="p-4 flex flex-col gap-3 w-[300px]">
-		<h2 class="text-lg font-semibold">Add New Task</h2>
-		<input type="text" placeholder="Title" value={title} oninput={e => title = e.target.value} required class="border px-2 py-1 rounded"/>
-<textarea placeholder="Description" oninput={e => description = e.target.value} class="border px-2 py-1 rounded">{description}</textarea>		<input type="date" value={dueDate} oninput={e => dueDate = e.target.value} class="border px-2 py-1 rounded"/>
-		<input type="number" min="1" max="100" value={storyPoints} oninput={e => storyPoints = +e.target.value} class="border px-2 py-1 rounded"/>
-		<select value={priority} oninput={e => priority = e.target.value} class="border px-2 py-1 rounded">
-			<option>Low</option>
-			<option>Medium</option>
-			<option>High</option>
-		</select>
+  <form on:submit={e => { e.preventDefault(); submit(); }} class="p-4 flex flex-col gap-3 w-[300px]">
+    <h2 class="text-lg font-semibold">{taskToEdit ? "Edit Task" : "Add New Task"}</h2>
 
-		<div class="flex justify-end gap-2 mt-2">
-			<button type="button" onclick={closeDialog} class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-			<button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Add</button>
-		</div>
-	</form>
+    <input
+      type="text"
+      placeholder="Title"
+      bind:value={title}
+      required
+      class="border px-2 py-1 rounded"
+    />
+
+    <textarea
+      placeholder="Description"
+      bind:value={description}
+      class="border px-2 py-1 rounded"
+    ></textarea>
+
+    <input
+      type="date"
+      bind:value={dueDate}
+      class="border px-2 py-1 rounded"
+    />
+
+    <input
+      type="number"
+      min="1"
+      max="100"
+      bind:value={storyPoints}
+      class="border px-2 py-1 rounded"
+    />
+
+    <select bind:value={priority} class="border px-2 py-1 rounded">
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
+
+    <div class="flex justify-end gap-2 mt-2">
+      <button
+        type="button"
+        on:click={closeDialog}
+        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        {taskToEdit ? "Save" : "Add"}
+      </button>
+    </div>
+  </form>
 </dialog>
