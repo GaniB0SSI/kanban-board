@@ -2,9 +2,23 @@
     import TaskModal from "$lib/components/TaskModal.svelte";
     import { onMount } from "svelte";
 
+let userCountry = "Unknown";
+
     let tasks = [];
     let modalRef;
     let currentTaskToEdit = null;
+
+    onMount(async () => {
+    try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (res.ok) {
+            const data = await res.json();
+            userCountry = data.country_name || "Unknown";
+        }
+    } catch (err) {
+        console.error("Could not fetch user location:", err);
+    }
+});
     function exportCSV() {
     if (!tasks.length) {
         alert("No tasks to export.");
@@ -156,12 +170,15 @@ END:VCALENDAR
 <!-- Header -->
 <div class="flex justify-between items-center p-4 bg-blue-600 text-white">
     <h1 class="text-lg font-semibold">Kanban Board</h1>
-    <button onclick={openModal} class="px-4 py-2 bg-white text-blue-600 rounded hover:bg-blue-100">
-        Add Task
-    </button>
-    <button onclick={exportCSV} class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-    Download CSV
-</button>
+    <div class="flex gap-4 items-center">
+        <button onclick={openModal} class="px-4 py-2 bg-white text-blue-600 rounded hover:bg-blue-100">
+            Add Task
+        </button>
+        <button onclick={exportCSV} class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+            Download CSV
+        </button>
+        <span class="text-sm">🌐 {userCountry}</span>
+    </div>
 </div>
 
 <!-- Board -->
