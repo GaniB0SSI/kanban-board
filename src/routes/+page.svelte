@@ -5,6 +5,38 @@
     let tasks = [];
     let modalRef;
     let currentTaskToEdit = null;
+    function exportCSV() {
+    if (!tasks.length) {
+        alert("No tasks to export.");
+        return;
+    }
+
+    const headers = ["Title", "Description", "Created At", "Due Date", "Story Points", "Priority", "Lane"];
+    const rows = tasks.map(t => [
+        t.title,
+        t.description,
+        t.createdAt,
+        t.dueDate,
+        t.storyPoints,
+        t.priority,
+        t.lane
+    ]);
+
+    // Build CSV string
+    const csvContent =
+        [headers, ...rows]
+        .map(e => e.map(field => `"${String(field).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+
+    // Trigger download
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "kanban-tasks.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+}
 
     onMount(() => {
         const saved = localStorage.getItem("kanban-tasks");
@@ -127,6 +159,9 @@ END:VCALENDAR
     <button onclick={openModal} class="px-4 py-2 bg-white text-blue-600 rounded hover:bg-blue-100">
         Add Task
     </button>
+    <button onclick={exportCSV} class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+    Download CSV
+</button>
 </div>
 
 <!-- Board -->
