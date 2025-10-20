@@ -6,6 +6,7 @@
     export let onDelete;
     export let onExportICS;
     export let onShare;
+    export let onDragStart;
 
     // Helpers: date formatting
     function fmt(dateString) {
@@ -28,6 +29,7 @@
     data-id={task.id}
     class="bg-white p-2 rounded shadow cursor-move {isOverdue ? 'border-2 border-red-500' : ''}"
     draggable="true"
+    ondragstart={onDragStart}
 >
     <h3 class="font-semibold">{task.title}</h3>
     <p class="text-sm">{task.description}</p>

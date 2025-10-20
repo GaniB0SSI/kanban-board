@@ -24,9 +24,10 @@
 </script>
 
 <div
-	class="lane bg-gray-100 rounded-xl shadow p-4 w-[300px] flex flex-col gap-3"
-	on:drop={handleDrop}
-	on:dragover={allowDrop}
+    role="list"
+    class="lane bg-gray-100 rounded-xl shadow p-4 w-[300px] flex flex-col gap-3"
+    on:drop={handleDrop}
+    on:dragover={allowDrop}
 >
 	<!-- 🏷️ Lane title with story points -->
 	<h2 class="text-xl font-semibold mb-2">
