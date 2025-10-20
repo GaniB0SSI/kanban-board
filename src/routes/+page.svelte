@@ -1,5 +1,7 @@
 <script>
     import TaskModal from "$lib/components/TaskModal.svelte";
+    import UserLocation from "$lib/components/UserLocation.svelte";
+    import Lane from "$lib/components/Lane.svelte";
     import { onMount } from "svelte";
     import { format, parseISO, isValid } from "date-fns";
 
@@ -236,3 +238,4 @@ END:VCALENDAR
 
 <!-- Task Modal -->
 <TaskModal bind:this={modalRef} onAddTask={addTask} onEditTask={editTask} taskToEdit={currentTaskToEdit} />
+
