@@ -1,7 +1,7 @@
 <script>
     import TaskModal from "$lib/components/TaskModal.svelte";
     import UserLocation from "$lib/components/UserLocation.svelte";
-    import Lane from "$lib/components/Lane.svelte";
+    import Board from "$lib/components/Board.svelte";
     import { onMount } from "svelte";
     import { format, parseISO, isValid } from "date-fns";
 
@@ -198,43 +198,15 @@ END:VCALENDAR
 </div>
 
 <!-- Board -->
-<div class="flex gap-4 p-4 flex-wrap">
-    {#each ["todo","doing","done","archive"] as lane}
-        <section
-            role="list"
-            class="w-[230px] bg-gray-100 p-3 rounded flex flex-col gap-2"
-            ondragover={e => e.preventDefault()}
-            ondrop={() => handleDrop(lane)}
-        >
-            <h2 class="font-bold mb-2 capitalize">
-                {lane} ({tasks.filter(t => t.lane === lane).reduce((sum, t) => sum + (t.storyPoints || 0), 0)} SP)
-            </h2>
-
-            {#each tasks.filter(t => t.lane === lane) as task (task.id)}
-                <div
-                    role="listitem"
-                    data-id={task.id}
-                    class="bg-white p-2 rounded shadow cursor-move {task.dueDate && new Date(task.dueDate) < new Date() ? 'border-2 border-red-500' : ''}"
-                    draggable="true"
-                    ondragstart={handleDragStart}
-                >
-                    <h3 class="font-semibold">{task.title}</h3>
-                    <p class="text-sm">{task.description}</p>
-                    <p class="text-xs text-gray-500">Created: {task.createdAt ? fmt(task.createdAt) : "-"}</p>
-                    <p class="text-xs text-gray-500">Due: {task.dueDate ? fmt(task.dueDate) : "-"}</p>
-                    <p class="text-xs text-gray-500">SP: {task.storyPoints} | Priority: {task.priority}</p>
-
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <button onclick={() => openEditModal(task)} class="px-2 py-1 text-xs bg-yellow-400 text-white rounded">Edit</button>
-                        <button onclick={() => deleteTask(task.id)} class="px-2 py-1 text-xs bg-red-500 text-white rounded">Delete</button>
-                        <button onclick={() => exportICS(task)} class="px-2 py-1 text-xs bg-green-500 text-white rounded">ICS</button>
-                        <button onclick={() => shareTask(task)} class="px-2 py-1 text-xs bg-blue-500 text-white rounded">Share</button>
-                    </div>
-                </div>
-            {/each}
-        </section>
-    {/each}
-</div>
+<Board 
+    {tasks}
+    onDragStart={handleDragStart}
+    onDrop={handleDrop}
+    onEdit={openEditModal}
+    onDelete={deleteTask}
+    onExportICS={exportICS}
+    onShare={shareTask}
+/>
 
 <!-- Task Modal -->
 <TaskModal bind:this={modalRef} onAddTask={addTask} onEditTask={editTask} taskToEdit={currentTaskToEdit} />
