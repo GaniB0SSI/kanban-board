@@ -236,4 +236,3 @@ END:VCALENDAR
 <TaskModal bind:this={modalRef} onAddTask={addTask} onEditTask={editTask} taskToEdit={currentTaskToEdit} />
 
 <!-- Footer -->
-<UserLocation />
