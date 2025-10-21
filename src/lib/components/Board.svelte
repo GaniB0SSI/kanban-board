@@ -3,6 +3,8 @@
 
     export let tasks = [];
     export let onDragStart;
+    export let onMoveLeft;
+    export let onMoveRight;
     export let onDrop;
     export let onEdit;
     export let onDelete;
@@ -67,6 +69,8 @@
                                     onExportICS={onExportICS}
                                     onShare={onShare}
                                     onDragStart={onDragStart}
+                                    on:moveleft={(e) => onMoveLeft && onMoveLeft(e.detail.id)}
+                                    on:moveright={(e) => onMoveRight && onMoveRight(e.detail.id)}
                                 />
                             {/each}
                         </div>

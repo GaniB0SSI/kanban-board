@@ -9,6 +9,8 @@
     let modalRef;
     let currentTaskToEdit = null;
     let userCountry = "Unknown";
+    const UNDO_KEY = 'kanban-undo-stack';
+    let undoStack = [];
 
     // Load tasks from localStorage
     onMount(async () => {
@@ -20,6 +22,12 @@
                 storyPoints: Number(t.storyPoints || 0),
                 lane: t.lane || "todo"
             }));
+        }
+
+        // load undo stack
+        const savedUndo = localStorage.getItem(UNDO_KEY);
+        if (savedUndo) {
+            try { undoStack = JSON.parse(savedUndo) } catch {}
         }
 
         // Geo-API: detect country
@@ -64,17 +72,22 @@
             lane: "todo"
         };
         tasks = [...tasks, task];
+        pushUndo({ type: 'add', task });
     }
 
     // Edit an existing task
     function editTask(updatedTask) {
         const normalized = { ...updatedTask, storyPoints: Number(updatedTask.storyPoints || 0) };
+        const before = tasks.find(t => t.id === normalized.id);
         tasks = tasks.map(t => t.id === normalized.id ? normalized : t);
+        pushUndo({ type: 'edit', before, after: normalized });
     }
 
     // Delete a task
     function deleteTask(id) {
+        const before = tasks.find(t => t.id === id);
         tasks = tasks.filter(t => t.id !== id);
+        pushUndo({ type: 'delete', before });
     }
 
     // Open modal for add
@@ -98,14 +111,63 @@
     }
     function handleDrop(lane) {
         if (!draggedTaskId) return;
-        tasks = tasks.map(t => {
-            if (t.id == draggedTaskId) {
-                if (lane === "done" && t.lane !== "done") notifyTaskDone(t);
-                return { ...t, lane };
-            }
-            return t;
-        });
+        const id = draggedTaskId;
+        const before = tasks.find(t => t.id == id);
+        tasks = tasks.map(t => t.id == id ? ({ ...t, lane }) : t);
+        const after = tasks.find(t => t.id == id);
+        pushUndo({ type: 'move', before, after });
+        if (lane === "done" && before && before.lane !== "done") notifyTaskDone(after);
         draggedTaskId = null;
+    }
+
+    // Keyboard move handlers (triggered from IssueCard events)
+    function moveLeft(id) {
+        const order = ['todo','doing','done','archive'];
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+        const idx = order.indexOf(task.lane);
+        if (idx > 0) {
+            const newLane = order[idx-1];
+            const before = { ...task };
+            tasks = tasks.map(t => t.id === id ? { ...t, lane: newLane } : t);
+            const after = tasks.find(t => t.id === id);
+            pushUndo({ type: 'move', before, after });
+        }
+    }
+    function moveRight(id) {
+        const order = ['todo','doing','done','archive'];
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+        const idx = order.indexOf(task.lane);
+        if (idx < order.length-1) {
+            const newLane = order[idx+1];
+            const before = { ...task };
+            tasks = tasks.map(t => t.id === id ? { ...t, lane: newLane } : t);
+            const after = tasks.find(t => t.id === id);
+            pushUndo({ type: 'move', before, after });
+            if (newLane === 'done' && before.lane !== 'done') notifyTaskDone(after);
+        }
+    }
+
+    // Undo stack helpers
+    function pushUndo(entry) {
+        undoStack = [entry, ...undoStack].slice(0, 50); // keep last 50 actions
+        localStorage.setItem(UNDO_KEY, JSON.stringify(undoStack));
+    }
+
+    function undo() {
+        const entry = undoStack.shift();
+        if (!entry) return alert('Nothing to undo');
+        if (entry.type === 'add') {
+            tasks = tasks.filter(t => t.id !== entry.task.id);
+        } else if (entry.type === 'delete') {
+            tasks = [entry.before, ...tasks];
+        } else if (entry.type === 'edit') {
+            tasks = tasks.map(t => t.id === entry.before.id ? entry.before : t);
+        } else if (entry.type === 'move') {
+            tasks = tasks.map(t => t.id === entry.before.id ? entry.before : t);
+        }
+        localStorage.setItem(UNDO_KEY, JSON.stringify(undoStack));
     }
 
     // Notifications when done
@@ -127,20 +189,33 @@
         const start = task.dueDate ? new Date(task.dueDate) : new Date();
         const end = new Date(start.getTime() + 60 * 60 * 1000);
         const now = new Date();
-        const icsContent = `
-BEGIN:VCALENDAR
+
+        // Build timezone-aware ICS timestamps (use local timezone offset)
+        function toLocalICS(d) {
+            // Format: YYYYMMDDTHHMMSS
+            const pad = (n) => String(n).padStart(2, '0');
+            const year = d.getFullYear();
+            const month = pad(d.getMonth()+1);
+            const day = pad(d.getDate());
+            const hours = pad(d.getHours());
+            const mins = pad(d.getMinutes());
+            const secs = pad(d.getSeconds());
+            // Note: we omit trailing Z to indicate local time (common for ICS)
+            return `${year}${month}${day}T${hours}${mins}${secs}`;
+        }
+
+        const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Kanban Board//Task Export//EN
 BEGIN:VEVENT
 UID:${task.id}@kanban.local
-DTSTAMP:${formatICS(now)}
+DTSTAMP:${toLocalICS(now)}
 SUMMARY:${task.title}
 DESCRIPTION:${task.description}
-DTSTART:${formatICS(start)}
-DTEND:${formatICS(end)}
+DTSTART:${toLocalICS(start)}
+DTEND:${toLocalICS(end)}
 END:VEVENT
-END:VCALENDAR
-`.trim();
+END:VCALENDAR`.trim();
         const blob = new Blob([icsContent], { type: "text/calendar" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -230,6 +305,8 @@ END:VCALENDAR
     onDelete={deleteTask}
     onExportICS={exportICS}
     onShare={shareTask}
+    onMoveLeft={moveLeft}
+    onMoveRight={moveRight}
 />
 
 <!-- Task Modal -->
