@@ -9,7 +9,15 @@
     // Load tasks from localStorage
     onMount(() => {
         const saved = localStorage.getItem("kanban-tasks");
-        if (saved) tasks = JSON.parse(saved);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // migrate/coerce values to ensure numbers for SP and valid lanes
+            tasks = parsed.map(t => ({
+                ...t,
+                storyPoints: Number(t.storyPoints || 0),
+                lane: t.lane || "todo"
+            }));
+        }
     });
 
     // Save tasks whenever they change
@@ -19,11 +27,18 @@
 
     // Add a new task
     function addTask(newTask) {
-        newTask.id = crypto.randomUUID();
-        newTask.createdAt = new Date().toISOString();
-        newTask.storyPoints = Number(newTask.storyPoints) || 0; // ✅ ensure numeric
-        tasks = [...tasks, { ...newTask, lane: "todo" }];
-    }
+    const task = {
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        title: newTask.title,
+        description: newTask.description,
+        dueDate: newTask.dueDate,
+        storyPoints: Number(newTask.storyPoints) || 0, // ✅ important
+        priority: newTask.priority,
+        lane: "todo"
+    };
+    tasks = [...tasks, task];
+}
 
     // Edit existing task
     function editTask(updatedTask) {
@@ -141,7 +156,11 @@ END:VCALENDAR
     function getStoryPoints(lane) {
         return tasks
             .filter(t => t.lane === lane)
-            .reduce((sum, t) => sum + Number(t.storyPoints || 0), 0);
+            .reduce((sum, t) => {
+                const raw = t.storyPoints;
+                const parsed = Number.parseInt(String(raw ?? 0), 10);
+                return sum + (Number.isFinite(parsed) ? parsed : 0);
+            }, 0);
     }
 </script>
 
