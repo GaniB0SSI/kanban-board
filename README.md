@@ -158,3 +158,29 @@ This project was developed with AI assistance to meet academic requirements. The
 ## License
 
 This project is developed for academic purposes.
+
+## PWA / Offline Verification (Quick Test)
+
+Follow these steps to verify the PWA and offline behavior:
+
+1. Build and serve the production build (recommended):
+
+```powershell
+npm run build; npm run preview
+```
+
+2. Open the site in Chromium-based browser (Chrome, Edge) at the preview URL.
+
+3. Open DevTools > Application > Manifest to confirm the manifest loads and icons are detected.
+
+4. In DevTools > Application > Service Workers, confirm the service worker is registered and running. You should see `/service-worker.js` and that it controls the page.
+
+5. Test installability: A small install prompt should appear (or use the browser menu to "Install app"). We also added an in-app "Install App" button when the browser fires the `beforeinstallprompt` event.
+
+6. Test offline:
+   - With DevTools offline throttling or by turning off network, reload the page. The app should still load (served from cache) and you should see the offline fallback if the main page isn't available.
+   - Create or modify tasks while offline. The app uses `localStorage` so changes persist locally and will remain after reload.
+
+7. Test updates: When deploying a new version, the app exposes an "Update Available — Refresh" button to activate the new service worker and refresh the page.
+
+If something fails, check the browser console and the Service Worker panel for errors. Common issues are wrong paths in `manifest.json` or missing icon files.

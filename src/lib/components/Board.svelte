@@ -53,6 +53,8 @@
                     <!-- Lane Content -->
                     <div 
                         class="p-4 min-h-96 {lane.color}"
+                        role="region"
+                        aria-label={lane.label + ' lane'}
                         ondragover={e => e.preventDefault()}
                         ondrop={() => onDrop(lane.key)}
                     >
