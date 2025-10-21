@@ -3,6 +3,7 @@
     import { onMount } from "svelte";
 
     let tasks = [];
+    let hasLoadedFromStorage = false;
     let modalRef;
     let currentTaskToEdit = null;
 
@@ -18,10 +19,11 @@
                 lane: t.lane || "todo"
             }));
         }
+        hasLoadedFromStorage = true;
     });
 
-    // Save tasks whenever they change
-    $: if (typeof window !== "undefined") {
+    // Save tasks after initial load to avoid overwriting saved data with []
+    $: if (typeof window !== "undefined" && hasLoadedFromStorage) {
         localStorage.setItem("kanban-tasks", JSON.stringify(tasks));
     }
 
