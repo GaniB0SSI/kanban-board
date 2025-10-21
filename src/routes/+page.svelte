@@ -207,12 +207,17 @@ END:VCALENDAR
 </script>
 
 <!-- Header -->
-<div class="flex justify-between items-center p-4 bg-blue-600 text-white">
-    <h1 class="text-lg font-semibold">Kanban Board</h1>
-
-    <div class="flex items-center gap-3">
-        <button onclick={openModal} class="px-3 py-2 bg-white text-blue-600 rounded">Add Task</button>
-        <button onclick={exportCSV} class="px-3 py-2 bg-green-600 text-white rounded">Download CSV</button>
+<div class="bg-slate-700 text-white px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+        <h1 class="text-xl font-bold">Kanban Board</h1>
+    </div>
+    <div class="flex items-center space-x-3">
+        <button onclick={openModal} class="bg-white text-slate-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition-colors">
+            Add Task
+        </button>
+        <button onclick={exportCSV} class="bg-emerald-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-emerald-700 transition-colors">
+            Export CSV
+        </button>
     </div>
 </div>
 

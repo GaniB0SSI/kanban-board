@@ -13,47 +13,68 @@
         try {
             const d = parseISO(dateString);
             if (!isValid(d)) return dateString;
-            return format(d, "d. MMM yyyy, HH:mm");
+            return format(d, "MMM d");
         } catch {
             return dateString;
         }
     }
 
     $: isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
+    $: priorityColor = {
+        'High': 'bg-red-100 border-red-300 text-red-800',
+        'Medium': 'bg-yellow-100 border-yellow-300 text-yellow-800',
+        'Low': 'bg-green-100 border-green-300 text-green-800'
+    }[task.priority] || 'bg-gray-100 border-gray-300 text-gray-800';
 </script>
 
 <div
     role="listitem"
     data-id={task.id}
-    class="card p-3 cursor-move border {isOverdue ? 'border-red-300' : 'border-transparent'}"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-move hover:shadow-md transition-shadow {isOverdue ? 'border-red-300 bg-red-50' : ''}"
     draggable="true"
     ondragstart={onDragStart}
 >
-    <div class="flex items-start justify-between gap-2">
-        <h3 class="font-semibold leading-tight">{task.title}</h3>
+    <!-- Card Header -->
+    <div class="flex items-start justify-between mb-3">
+        <h3 class="font-semibold text-gray-900 text-sm leading-tight">{task.title}</h3>
         {#if isOverdue}
-            <span class="badge badge-danger" aria-label="This task is overdue">Overdue</span>
+            <span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
+                Overdue
+            </span>
         {/if}
     </div>
-    <p class="text-sm mt-1 whitespace-pre-wrap">{task.description}</p>
-    <div class="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-600">
-        <div>Created: {fmt(task.createdAt)}</div>
-        <div>Due: {fmt(task.dueDate)}</div>
-        <div>SP: {task.storyPoints}</div>
-        <div>Priority: {task.priority}</div>
+
+    <!-- Card Content -->
+    <p class="text-gray-600 text-sm mb-3 line-clamp-2">{task.description}</p>
+
+    <!-- Card Footer -->
+    <div class="flex items-center justify-between text-xs text-gray-500">
+        <div class="flex items-center space-x-2">
+            <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-medium">
+                SP: {task.storyPoints}
+            </span>
+            <span class="border px-2 py-1 rounded-full font-medium {priorityColor}">
+                {task.priority}
+            </span>
+        </div>
+        <div class="flex items-center space-x-1">
+            <span class="text-gray-400">📅</span>
+            <span>{fmt(task.dueDate)}</span>
+        </div>
     </div>
 
-    <div class="mt-3 flex flex-wrap gap-2">
-        <button onclick={() => onEdit(task)} class="btn btn-warning text-xs">
+    <!-- Action Buttons -->
+    <div class="mt-4 flex flex-wrap gap-2">
+        <button onclick={() => onEdit(task)} class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium px-3 py-1.5 rounded-md transition-colors">
             Edit
         </button>
-        <button onclick={() => onDelete(task.id)} class="btn btn-danger text-xs">
+        <button onclick={() => onDelete(task.id)} class="bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1.5 rounded-md transition-colors">
             Delete
         </button>
-        <button onclick={() => onExportICS(task)} class="btn btn-accent text-xs">
+        <button onclick={() => onExportICS(task)} class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium px-3 py-1.5 rounded-md transition-colors">
             ICS
         </button>
-        <button onclick={() => onShare(task)} class="btn btn-primary text-xs">
+        <button onclick={() => onShare(task)} class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md transition-colors">
             Share
         </button>
     </div>
