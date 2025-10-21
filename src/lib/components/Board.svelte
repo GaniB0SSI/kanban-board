@@ -17,20 +17,10 @@
         { key: "archive", label: "Archiv" }
     ];
 
-    // Calculate story points per lane
     function getStoryPointsForLane(laneKey) {
         return tasks
-            .filter((t) => t.lane === laneKey)
-            .reduce((sum, t) => {
-                const raw = t.storyPoints;
-                const parsed = Number.parseInt(String(raw ?? 0).toString().trim(), 10);
-                return sum + (Number.isFinite(parsed) ? parsed : 0);
-            }, 0);
-    }
-
-    // Count cards per lane
-    function getCountForLane(laneKey) {
-        return tasks.filter((t) => t.lane === laneKey).length;
+            .filter(t => t.lane === laneKey)
+            .reduce((sum, t) => sum + (Number.parseInt(t.storyPoints) || 0), 0);
     }
 </script>
 
