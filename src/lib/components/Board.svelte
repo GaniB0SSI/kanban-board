@@ -19,7 +19,18 @@
 
     // Calculate story points per lane
     function getStoryPointsForLane(laneKey) {
-        return tasks.filter(t => t.lane === laneKey).reduce((sum, t) => sum + (t.storyPoints || 0), 0);
+        return tasks
+            .filter((t) => t.lane === laneKey)
+            .reduce((sum, t) => {
+                const raw = t.storyPoints;
+                const parsed = Number.parseInt(String(raw ?? 0).toString().trim(), 10);
+                return sum + (Number.isFinite(parsed) ? parsed : 0);
+            }, 0);
+    }
+
+    // Count cards per lane
+    function getCountForLane(laneKey) {
+        return tasks.filter((t) => t.lane === laneKey).length;
     }
 </script>
 
@@ -32,7 +43,7 @@
             ondrop={() => onDrop(lane.key)}
         >
             <h2 class="font-bold mb-2">
-                {lane.label} ({getStoryPointsForLane(lane.key)} SP)
+                {lane.label} (SP {getStoryPointsForLane(lane.key)})
             </h2>
 
             {#each tasks.filter(t => t.lane === lane.key) as task (task.id)}

@@ -13,7 +13,14 @@
     // Load tasks from localStorage
     onMount(async () => {
         const saved = localStorage.getItem("kanban-tasks");
-        if (saved) tasks = JSON.parse(saved);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            tasks = parsed.map(t => ({
+                ...t,
+                storyPoints: Number(t.storyPoints || 0),
+                lane: t.lane || "todo"
+            }));
+        }
 
         // Geo-API: detect country
         try {
@@ -46,14 +53,23 @@
 
     // Add a new task
     function addTask(newTask) {
-        newTask.id = crypto.randomUUID();
-        newTask.createdAt = new Date().toISOString();
-        tasks = [...tasks, { ...newTask, lane: "todo" }];
+        const task = {
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            title: newTask.title,
+            description: newTask.description,
+            dueDate: newTask.dueDate,
+            storyPoints: Number(newTask.storyPoints) || 0,
+            priority: newTask.priority,
+            lane: "todo"
+        };
+        tasks = [...tasks, task];
     }
 
     // Edit an existing task
     function editTask(updatedTask) {
-        tasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+        const normalized = { ...updatedTask, storyPoints: Number(updatedTask.storyPoints || 0) };
+        tasks = tasks.map(t => t.id === normalized.id ? normalized : t);
     }
 
     // Delete a task
@@ -110,10 +126,14 @@
     function exportICS(task) {
         const start = task.dueDate ? new Date(task.dueDate) : new Date();
         const end = new Date(start.getTime() + 60 * 60 * 1000);
+        const now = new Date();
         const icsContent = `
 BEGIN:VCALENDAR
 VERSION:2.0
+PRODID:-//Kanban Board//Task Export//EN
 BEGIN:VEVENT
+UID:${task.id}@kanban.local
+DTSTAMP:${formatICS(now)}
 SUMMARY:${task.title}
 DESCRIPTION:${task.description}
 DTSTART:${formatICS(start)}
@@ -193,7 +213,6 @@ END:VCALENDAR
     <div class="flex items-center gap-3">
         <button onclick={openModal} class="px-3 py-2 bg-white text-blue-600 rounded">Add Task</button>
         <button onclick={exportCSV} class="px-3 py-2 bg-green-600 text-white rounded">Download CSV</button>
-        <span class="text-sm opacity-90">🌐 {userCountry}</span>
     </div>
 </div>
 
