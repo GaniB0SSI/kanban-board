@@ -28,20 +28,22 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const isSameOrigin = new URL(request.url).origin === self.location.origin;
+
+  // Bypass cross-origin (e.g., geo API) to avoid CORS issues
+  if (!isSameOrigin) return;
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        return response;
-      }
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return fetch(request).then((network) => {
+        if (!network || network.status !== 200 || network.type !== 'basic') {
+          return network;
         }
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-        return response;
+        const copy = network.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        return network;
       });
     })
   );
