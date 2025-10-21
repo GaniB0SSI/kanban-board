@@ -16,19 +16,25 @@
         dueDate = taskToEdit.dueDate || "";
         storyPoints = taskToEdit.storyPoints || 1;
         priority = taskToEdit.priority || "Medium";
-    } else {
-        reset();
     }
 
     function submit() {
-        const taskData = { title, description, dueDate, storyPoints, priority, lane: taskToEdit ? taskToEdit.lane : "todo" };
+        const parsedSP = Number(storyPoints) || 0; // ✅ Convert to number
+        if (!title.trim() || !description.trim() || !dueDate.trim() || parsedSP <= 0) return;
+
+        const taskData = {
+            title: title.trim(),
+            description: description.trim(),
+            dueDate,
+            storyPoints: parsedSP, // ✅ numeric
+            priority,
+            lane: taskToEdit ? taskToEdit.lane : "todo"
+        };
+
         if (taskToEdit) onEditTask({ ...taskToEdit, ...taskData });
         else onAddTask(taskData);
-        reset();
-        dialogEl.close();
-    }
 
-    function cancel() {
+        reset();
         dialogEl.close();
     }
 
@@ -38,6 +44,10 @@
         dueDate = "";
         storyPoints = 1;
         priority = "Medium";
+    }
+
+    function cancel() {
+        dialogEl.close();
     }
 
     export function showDialog() {
@@ -50,9 +60,9 @@
         <h2 class="text-lg font-semibold">{taskToEdit ? "Edit Task" : "Add Task"}</h2>
 
         <input type="text" placeholder="Title" bind:value={title} class="border px-2 py-1 rounded" required />
-        <textarea placeholder="Description" bind:value={description} class="border px-2 py-1 rounded"></textarea>
-        <input type="date" bind:value={dueDate} class="border px-2 py-1 rounded" />
-        <input type="number" min="1" bind:value={storyPoints} class="border px-2 py-1 rounded" />
+        <textarea placeholder="Description" bind:value={description} class="border px-2 py-1 rounded" required></textarea>
+        <input type="date" bind:value={dueDate} class="border px-2 py-1 rounded" required />
+        <input type="number" min="1" bind:value={storyPoints} class="border px-2 py-1 rounded" required />
         <select bind:value={priority} class="border px-2 py-1 rounded">
             <option>Low</option>
             <option>Medium</option>
