@@ -25,16 +25,16 @@
 	}
 </script>
 
-<div class="flex gap-4 p-4 flex-wrap">
+<div class="flex gap-6 p-6 flex-wrap">
 	{#each lanes as lane}
 		<section
-			class="w-[230px] bg-gray-100 p-3 rounded flex flex-col gap-2"
+			class="lane w-[260px] p-4 flex flex-col gap-3"
 			ondragover={(e) => e.preventDefault()}
 			ondrop={() => onDrop(lane.key)}
 		>
-			<h2 class="font-bold mb-2 flex justify-between items-center">
+			<h2 class="text-sm font-semibold tracking-wide flex justify-between items-center">
 				<span>{lane.label}</span>
-				<span class="text-sm text-gray-600">SP {getStoryPoints(lane.key)}</span>
+				<span class="badge badge-muted">SP {getStoryPoints(lane.key)}</span>
 			</h2>
 
 			{#each tasks.filter((t) => t.lane === lane.key) as task (task.id)}

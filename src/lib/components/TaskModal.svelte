@@ -55,8 +55,8 @@
     }
 </script>
 
-<dialog bind:this={dialogEl}>
-    <form class="p-4 flex flex-col gap-3 w-[300px]" onsubmit={e => { e.preventDefault(); submit(); }}>
+<dialog bind:this={dialogEl} class="card">
+    <form class="p-4 flex flex-col gap-3 w-[360px]" onsubmit={e => { e.preventDefault(); submit(); }}>
         <h2 class="text-lg font-semibold">{taskToEdit ? "Edit Task" : "Add Task"}</h2>
 
         <input type="text" placeholder="Title" bind:value={title} class="border px-2 py-1 rounded" required />
@@ -70,8 +70,8 @@
         </select>
 
         <div class="flex justify-end gap-2 mt-2">
-            <button type="button" onclick={cancel} class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-            <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <button type="button" onclick={cancel} class="btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">
                 {taskToEdit ? "Save" : "Add"}
             </button>
         </div>
