@@ -43,14 +43,6 @@
         <div>Priority: {task.priority}</div>
     </div>
 
-    {#if isOverdue}
-        <div class="mt-1">
-            <span class="inline-block px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-                ⚠️ Overdue
-            </span>
-        </div>
-    {/if}
-
     <div class="mt-3 flex flex-wrap gap-2">
         <button onclick={() => onEdit(task)} class="btn btn-warning text-xs">
             Edit
