@@ -85,27 +85,27 @@
 
         <h2 class="text-lg font-semibold">{taskToEdit ? "Edit Task" : "Add Task"}</h2>
 
-        <input type="text" placeholder="Title" bind:value={title} class="border px-2 py-1 rounded" aria-invalid={!validTitle} onblur={() => touchedTitle = true} required />
+        <input id="title" name="title" type="text" placeholder="Title" bind:value={title} class="border px-2 py-1 rounded" aria-invalid={!validTitle} onblur={() => touchedTitle = true} required />
         {#if touchedTitle && !validTitle}
             <p class="text-xs text-red-600">Title is required.</p>
         {/if}
 
-        <textarea placeholder="Description" bind:value={description} class="border px-2 py-1 rounded" aria-invalid={!validDescription} onblur={() => touchedDescription = true}></textarea>
+        <textarea id="description" name="description" placeholder="Description" bind:value={description} class="border px-2 py-1 rounded" aria-invalid={!validDescription} onblur={() => touchedDescription = true}></textarea>
         {#if touchedDescription && !validDescription}
             <p class="text-xs text-red-600">Description is required.</p>
         {/if}
 
-        <input type="date" bind:value={dueDate} class="border px-2 py-1 rounded" aria-invalid={!validDueDate} onblur={() => touchedDueDate = true} />
+        <input id="dueDate" name="dueDate" type="date" bind:value={dueDate} class="border px-2 py-1 rounded" aria-invalid={!validDueDate} onblur={() => touchedDueDate = true} />
         {#if touchedDueDate && !validDueDate}
             <p class="text-xs text-red-600">Due date is required.</p>
         {/if}
 
-        <input type="number" min="1" bind:value={storyPoints} class="border px-2 py-1 rounded" aria-invalid={!validStoryPoints} onblur={() => touchedStoryPoints = true} />
+        <input id="storyPoints" name="storyPoints" type="number" min="1" bind:value={storyPoints} class="border px-2 py-1 rounded" aria-invalid={!validStoryPoints} onblur={() => touchedStoryPoints = true} />
         {#if touchedStoryPoints && !validStoryPoints}
             <p class="text-xs text-red-600">Story points must be a positive integer.</p>
         {/if}
 
-        <select bind:value={priority} class="border px-2 py-1 rounded" aria-invalid={!validPriority} onblur={() => touchedPriority = true}>
+        <select id="priority" name="priority" bind:value={priority} class="border px-2 py-1 rounded" aria-invalid={!validPriority} onblur={() => touchedPriority = true}>
             <option>Low</option>
             <option>Medium</option>
             <option>High</option>
